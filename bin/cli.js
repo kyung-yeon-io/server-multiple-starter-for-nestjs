@@ -38,12 +38,30 @@ const runServerStart = async () => {
   for (const serverFolderPath of server) {
     const name = serverFolderPath.substring(serverFolderPath.lastIndexOf('/') + 1);
 
-    const file = await fs.readFileSync(serverFolderPath + '/gateway.json', { encoding: 'utf8' });
-    const location = `~ (${JSON.parse(file).paths.join('|')})`;
+    const locationPath = [];
+
+    try {
+      const file = await fs.readFileSync(serverFolderPath + '/gateway.json', { encoding: 'utf8' });
+      locationPath.push(...JSON.parse(file ?? {}).paths);
+    } catch (e) {}
+
+    try {
+      const file = await fs.readFileSync(serverFolderPath + '/gateway-int.json', { encoding: 'utf8' });
+      locationPath.push(...JSON.parse(file ?? {}).paths);
+    } catch (e) {}
+
+    try {
+      const file = await fs.readFileSync(serverFolderPath + '/gateway-ext.json', { encoding: 'utf8' });
+      locationPath.push(...JSON.parse(file ?? {}).paths);
+    } catch (e) {}
+
+    if (!locationPath.length) {
+      throw new Error(`${serverFolderPath} 프로젝트의 gateway.json 파일 설정이 올바르지 않습니다.`);
+    }
 
     serverList.push({
       name,
-      location,
+      location: `~ (${locationPath.join('|')})`,
       path: serverFolderPath,
       port,
       proxy: `http://localhost:${port}`,
