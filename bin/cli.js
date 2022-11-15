@@ -27,7 +27,7 @@ const runServerStart = async () => {
     confPath = nginxPath.substring(0, nginxPath.indexOf('nginx.conf') + 10);
   }
 
-  if (!server) {
+  if (!server.length) {
     throw new Error('server path 를 띄워쓰기로 구분하여 입력해주세요');
   }
 
@@ -111,3 +111,7 @@ const runServerStart = async () => {
 runServerStart()
   .then()
   .catch((e) => console.log('e', e));
+
+process.once('SIGINT', async () => {
+  await spawn('brew', ['services', 'stop', 'nginx']);
+});
