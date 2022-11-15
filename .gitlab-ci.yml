@@ -1,0 +1,63 @@
+stages:
+  - publish
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_DESCRIPTION =~ /(patch|minor|major)/
+
+publish:
+  stage: publish
+  script:
+    # .npmrc
+    - |
+      if [[ ! -f .npmrc ]]; then
+        echo "@common:registry=https://gitlab.washswat.com/api/v4/packages/npm/" >> ~/.npmrc
+        echo "//gitlab.washswat.com/api/v4/projects/$CI_PROJECT_ID/packages/npm/:_authToken=$CI_JOB_TOKEN" >> ~/.npmrc
+      fi
+
+    # setting gitlab
+    - |
+      git remote set-url origin https://package:$CI_GITLAB_TOKEN@gitlab.washswat.com/$CI_PROJECT_PATH.git
+      
+      git config user.name gitlab-actions
+      git config user.email gitlab-actions@gitlab.washswat.com
+      
+      git checkout main
+      git pull origin main --rebase
+
+    # version update
+    - |
+      if [[ "$CI_COMMIT_DESCRIPTION" =~ "patch" ]]; then
+        npm --no-git-tag-version version patch
+      fi
+      
+      if [[ "$CI_COMMIT_DESCRIPTION" =~ "minor" ]]; then
+        npm --no-git-tag-version version minor
+      fi
+      
+      if [[ "$CI_COMMIT_DESCRIPTION" =~ "major" ]]; then
+        npm --no-git-tag-version version major
+      fi
+
+      PACKAGE_NAME=$(jq -r .name package.json)
+      PACKAGE_VERSION=$(jq -r .version package.json)
+
+      git add .
+      git commit -m "auto bump up package version - action"
+      git push origin main -o ci.skip    
+
+    # publish
+    - |
+      npm publish
+
+    # slack
+    - |
+      MERGE_REQUEST_ID=$( echo $CI_COMMIT_DESCRIPTION | cut -d '!' -f2 )
+      MERGE_REQUEST_URL="$CI_PROJECT_URL/-/merge_requests/$MERGE_REQUEST_ID"
+      
+      curl -H "Content-Type: application/json" \
+        -X POST https://apis-devel.washswat.com/commerce-order/v1/admin/notify/slack \
+        -d "{ \"channel\": \"#npm-publish-alert\", \"text\": \"<!here> $PACKAGE_NAME@$PACKAGE_VERSION 이 배포되었습니다.\", \"threadText\": \"$MERGE_REQUEST_URL\" }"
+
+  only:
+    - main
