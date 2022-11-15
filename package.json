@@ -1,0 +1,15 @@
+{
+  "name": "api-local-tester",
+  "version": "1.0.0-beta-1",
+  "description": "",
+  "main": "bin/cli.js",
+  "bin": {
+    "msa-start": "/bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.washswat.com/common/api-local-tester.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
