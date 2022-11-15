@@ -16,8 +16,6 @@ const args = process.argv.splice(2).reduce((result, item) => {
   return result;
 }, {});
 
-console.log('args', args);
-
 const runServerStart = async () => {
   let confPath = args.c ?? args.conf;
   const server = [...new Set(args.s ?? args.server)];
@@ -32,9 +30,6 @@ const runServerStart = async () => {
   if (!server) {
     throw new Error('server path 를 띄워쓰기로 구분하여 입력해주세요');
   }
-
-  console.log('confPath', confPath);
-  console.log('server', server);
 
   // 1. create serverList
   const serverList = [];
@@ -113,4 +108,6 @@ const runServerStart = async () => {
   );
 };
 
-runServerStart().then();
+runServerStart()
+  .then()
+  .catch((e) => console.log('e', e));

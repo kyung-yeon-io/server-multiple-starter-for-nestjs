@@ -7,7 +7,7 @@ MSA로 생성되는 여러개의 서버를 로컬에서 동시에 띄워주는 t
 
 ## 사용방법
 ```
-npm i -g api-local-tester
+npm i -g @common/api-local-tester
 
 api-tester {params}
 ```
