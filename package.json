@@ -1,14 +1,13 @@
 {
-  "name": "api-local-tester",
-  "version": "1.0.0-beta-1",
+  "name": "@common/api-local-tester",
+  "version": "1.0.0",
   "description": "",
   "main": "bin/cli.js",
   "bin": {
     "msa-start": "/bin/cli.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://gitlab.washswat.com/common/api-local-tester.git"
+  "publishConfig": {
+    "@common:registry": "https://gitlab.washswat.com/api/v4/projects/488/packages/npm/"
   },
   "author": "",
   "license": "ISC"

@@ -1,5 +1,5 @@
 # api-local-tester
-MSA로 생성되는 여러개의 서버를 로컬에서 동시에 띄워주는 tester project
+MSA로 생성되는 여러개의 서버를 로컬에서 동시에 띄워주는 tester project.
 
 ## 사용을 위한 타 모듈 최소 버전
 * api-code-generator : ^1.0.0
