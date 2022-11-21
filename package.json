@@ -1,14 +1,17 @@
 {
-  "name": "@common/api-local-tester",
+  "name": "nestjs-multiple-starter",
   "version": "1.0.0",
   "description": "",
   "main": "bin/cli.js",
   "bin": {
-    "msa-start": "/bin/cli.js"
+    "nestjs-multiple-starter": "/bin/cli.js"
   },
-  "publishConfig": {
-    "@common:registry": "https://gitlab.washswat.com/api/v4/projects/488/packages/npm/"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eric-byun/server-multiple-starter-for-nestjs"
   },
-  "author": "",
+  "url" : "https://github.com/eric-byun/server-multiple-starter-for-nestjs/issues",
+  "email" : "kissob4905@gmail.com",
+  "author": "kyung-yeon",
   "license": "ISC"
 }

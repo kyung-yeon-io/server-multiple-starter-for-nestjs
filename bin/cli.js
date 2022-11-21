@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const { spawn } = require('../lib/spawn-promise');
+const { DEFAULT_HOST_URL } = require('../constant');
 
 let command = '';
 const args = process.argv.splice(2).reduce((result, item) => {
@@ -31,8 +32,8 @@ const runServerStart = async () => {
     throw new Error('server path 를 띄워쓰기로 구분하여 입력해주세요');
   }
 
-  // 1. create serverList
-  const serverList = [];
+  // 1. create serverHostList
+  const serverHostList = [];
 
   let port = 3001;
   for (const serverFolderPath of server) {
@@ -45,21 +46,11 @@ const runServerStart = async () => {
       locationPath.push(...JSON.parse(file ?? {}).paths);
     } catch (e) {}
 
-    try {
-      const file = await fs.readFileSync(serverFolderPath + '/gateway-int.json', { encoding: 'utf8' });
-      locationPath.push(...JSON.parse(file ?? {}).paths);
-    } catch (e) {}
-
-    try {
-      const file = await fs.readFileSync(serverFolderPath + '/gateway-ext.json', { encoding: 'utf8' });
-      locationPath.push(...JSON.parse(file ?? {}).paths);
-    } catch (e) {}
-
     if (!locationPath.length) {
       throw new Error(`${serverFolderPath} 프로젝트의 gateway.json 파일 설정이 올바르지 않습니다.`);
     }
 
-    serverList.push({
+    serverHostList.push({
       name,
       location: `~ (${locationPath.join('|')})`,
       path: serverFolderPath,
@@ -70,29 +61,14 @@ const runServerStart = async () => {
     port++;
   }
 
-  const dig = await spawn('dig', ['apis.washswat.com']);
-
-  let msaHost = '';
-  if (dig.indexOf('devel') > 0) {
-    msaHost = 'http://kong-internal-gateway-devel.system.ecs.internal:8000';
-  } else if (dig.indexOf('stage') > 0) {
-    msaHost = 'http://kong-internal-gateway-devel.system.ecs.internal:8000';
-  } else if (dig.indexOf('canary') > 0) {
-    msaHost = 'http://kong-internal-gateway-prod.system.ecs.internal:8000';
-  } else if (dig.indexOf('prod') > 0) {
-    msaHost = 'http://kong-internal-gateway-prod.system.ecs.internal:8000';
-  } else {
-    throw new Error('dns 를 설정해주세요. (devel|stage|canary|prod)');
-  }
-
-  const msaServer = {
-    name: 'MSA_HOST',
+  const defaultServerHost = {
+    name: 'DEFAULT_HOST_URL',
     location: '/.+',
-    proxy: msaHost,
+    proxy: DEFAULT_HOST_URL,
   };
 
   // create nginx conf
-  const location = [...serverList, msaServer].reduce((result, item) => {
+  const location = [...serverHostList, defaultServerHost].reduce((result, item) => {
     result += `
         location ${item.location} {
           proxy_pass ${item.proxy};
@@ -113,7 +89,7 @@ const runServerStart = async () => {
 
   // 4. start server
   await Promise.all(
-    serverList.map((server) =>
+    serverHostList.map((server) =>
       spawn(`npm`, ['run', 'start:dev'], {
         cwd: pwd + '/' + server.path,
         env: {
